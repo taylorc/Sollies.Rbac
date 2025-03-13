@@ -13,6 +13,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddLogging();
+builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ISalesforceService, SalesforceService>();
 builder.Services.AddSingleton<IForceClientFactory, ForceClientFactory>();
 builder.Services.AddTransient<IRetrieveData, RetrieveData>();
