@@ -1,4 +1,5 @@
-﻿using Sollies.Rbac.Client.Pages;
+﻿using MudBlazor.Services;
+using Sollies.Rbac.Client.Pages;
 using Sollies.Rbac.Components;
 using Sollies.Rbac.Shared.Comparers;
 using Sollies.Rbac.Shared.DataAccess;
@@ -14,6 +15,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddLogging();
 builder.Services.AddMemoryCache();
+builder.Services.AddMudServices();
 builder.Services.AddSingleton<ISalesforceService, SalesforceService>();
 builder.Services.AddSingleton<IForceClientFactory, ForceClientFactory>();
 builder.Services.AddTransient<IRetrieveData, RetrieveData>();
