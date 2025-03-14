@@ -8,7 +8,7 @@
             private string id;
             private string name;
 
-            
+
 
             public class SetupEntity
             {
@@ -18,9 +18,9 @@
                 //CONN_APP("0H4", "AppMenuItem", "Connected Apps"),
                 //APEX_PAGE("066", "ApexPage", "Visualforce Pages");
 
-                private readonly string prefix;
-                private readonly string apiFieldName;
-                private readonly string displayName;
+                // private readonly string prefix;
+                // private readonly string apiFieldName;
+                // private readonly string displayName;
                 private readonly Dictionary<string, Tuple<string, string, string>> dictionary;
 
                 //private SetupEntityTypes(string prefix, string apiFieldName, string displayName)
@@ -144,7 +144,7 @@
                 }
                 else
                 {
-                    return null;
+                    return null!;
                 }
             }
 
@@ -156,7 +156,7 @@
                 }
                 else
                 {
-                    return null;
+                    return null!;
                 }
             }
 
