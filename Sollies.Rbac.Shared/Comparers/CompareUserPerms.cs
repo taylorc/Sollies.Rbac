@@ -8,6 +8,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Text;
     using System.Threading.Tasks;
     public class CompareUserPermissions : BaseCompare, ICompareUserPermissions
@@ -84,12 +85,20 @@
                 if (perm == null)
                     continue;
 
-                if (permsetInfo.GetType().GetProperty(perm) != null)
+                var param = Expression.Parameter(typeof(UserPermissionsDto), "p");
+                var exp = Expression.Lambda<Func<UserPermissionsDto, bool>>(
+                    Expression.Equal(
+                        Expression.Property(param, perm),
+                        Expression.Constant(true)
+                    ),
+                    param
+                );
+
+                var p = permsetInfo.SingleOrDefault(x => exp.Compile()(x));
+
+                if (p != null)
                 {
-                    if (permsetInfo.GetType().GetProperty(perm).GetValue(permsetInfo).ToString().Equals("true", StringComparison.Ordinal))
-                    {
                         permset.UserPerms.Add(perm);
-                    }
                 }
                 //if (permsetInfo.Contains(perm))
                 //{
