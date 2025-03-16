@@ -1,0 +1,151 @@
+﻿@page "/"
+@using MudBlazor
+@using Newtonsoft.Json.Linq
+@using Sollies.Rbac.Shared.Interfaces
+@inject IRetrieveData retrieveData
+@inject ICompareUserPermissions compareUserPermissions
+
+<PageTitle>Home</PageTitle>
+
+<div>
+    @if (_treeItemData.Count == 0)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col">
+                <MudPaper Width="500px" Elevation="0">
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudTextField T="string" Label="Search" Adornment="Adornment.Start"
+                        AdornmentIcon="@Icons.Material.Filled.Search" TextChanged="OnTextChanged" Immediate="true"
+                        Clearable="true" />
+                        <MudTreeView T="User" Items="@_treeItemData" @ref="_treeView" FilterFunc="MatchesName"
+                        SelectionMode="SelectionMode.MultiSelection" @bind-SelectedValues="SelectedValues">
+                            <ItemTemplate>
+                                <MudTreeViewItem T="User" @bind-Expanded="@context.Expanded" Items="@context.Children"
+                                Value="@context.Value" Icon="@context.Icon" Text="@context.Value.Text"
+                                Visible="@context.Visible" />
+                            </ItemTemplate>
+                        </MudTreeView>
+                    </MudStack>
+                </MudPaper>
+            </div>
+            <div class="col">
+                <MudButton ButtonType="ButtonType.Button" onclick="CompareUserPerms">Compare</MudButton>
+                <MudCard>
+                    <MudCardHeader>
+                        <MudCardTitle>Selected Users</MudCardTitle>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @UserPerms
+                    </MudCardContent>
+                    </MudCard>
+            </div>
+        </div>       
+    }
+</div>
+<div>
+
+</div>
+
+@code {
+    private List<TreeItemData<User>> _treeItemData = [];
+
+    private MudTreeView<User> _treeView;
+
+    private string _searchPhrase;
+
+    public IReadOnlyCollection<User> SelectedValues = [];
+    public string UserPerms { get; set; }
+
+    public string SelectedValuesString => string.Join(", ", SelectedValues.Select(x => x.Id));
+
+    public class User
+    {
+        public string Text { get; set; }
+        public string Icon { get; }
+        public string Id { get; set; }
+        public User(string text, string icon, string id)
+        {
+            Text = text;
+            Icon = icon;
+            Id = id;
+
+        }
+    }
+
+    public class TreeItemPresenter : TreeItemData<User>
+    {
+        public TreeItemPresenter(User user) : base(user)
+        {
+            User = user;
+        }
+
+        public User User { get; }
+    }
+
+    protected async Task<List<JObject>> GetData(string search)
+    {
+        return await retrieveData.GetItems("User", "", 500, false);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        var data = await GetData("");
+
+        foreach (var item in data)
+        {
+            _treeItemData.Add(new TreeItemPresenter(new User(item["Username"].ToString(), Icons.Material.Filled.Person, item["Id"].ToString())));
+        }
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        //         _treeItemData.Add(new TreeItemPresenter(new User("All Mail", Icons.Material.Filled.Email, "1")));
+        //         _treeItemData.Add(new TreeItemPresenter(new User("Trash", Icons.Material.Filled.Delete, "2")));
+        //         _treeItemData.Add(new TreeItemPresenter(new User("Categories", Icons.Material.Filled.Label, "3"))
+        //             {
+        //                 Expanded = false,
+        //                 Children =
+        //             [
+        //             new TreeItemPresenter(new User("Social", Icons.Material.Filled.Group,"4")),
+        // new TreeItemPresenter(new User("Updates", Icons.Material.Filled.Info,"5")),
+        // new TreeItemPresenter(new User("Forums", Icons.Material.Filled.QuestionAnswer, "6")),
+        // new TreeItemPresenter(new User("Promotions", Icons.Material.Filled.LocalOffer, "7"))
+        //             ]
+        //             });
+        //         _treeItemData.Add(new TreeItemPresenter(new User("History", Icons.Material.Filled.Label, "8")));
+    }
+
+    private async void OnTextChanged(string searchPhrase)
+    {
+        _searchPhrase = searchPhrase;
+        await _treeView.FilterAsync();
+    }
+
+    private Task<bool> MatchesName(TreeItemData<User> item)
+    {
+        if (string.IsNullOrEmpty(item.Value.Text))
+        {
+            return Task.FromResult(false);
+        }
+
+        return Task.FromResult(item.Value.Text.Contains(_searchPhrase, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task CompareUserPerms()
+    {
+        string[] ids = SelectedValues.Select(x => x.Id).ToArray();
+
+        UserPerms = await compareUserPermissions.CompareUserPerms(true, ids);
+    }
+}
