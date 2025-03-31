@@ -29,6 +29,8 @@ namespace Sollies.Rbac.FunctionalTests
 
             var result = await compareUserPermissions.CompareUserPerms(true, "0052j000000WkzFAAS", "0052j000000UJw0AAG");
 
+            File.WriteAllText("userperms.json", result);
+
             Console.WriteLine(result);
         }
 
@@ -41,11 +43,12 @@ namespace Sollies.Rbac.FunctionalTests
 
             IForceClientFactory forceClientFactory = new TestForceClientFactory();
             IRetrieveData retrieveData = new RetrieveData(forceClientFactory, logger, memoryCache);
-            ICompareObjectPermissions compareUserPermissions = new CompareObjectPermissions(retrieveData, logger);
+            ICompareObjectPermissions compareObjectPermissions = new CompareObjectPermissions(retrieveData, logger);
 
             //compare Aaron 0052j000000WkzFAAS and Alicia 0052j000000UJw0AAG
 
-            var result = await compareUserPermissions.CompareObjPerms(true, "0052j000000WkzFAAS", "0052j000000UJw0AAG");
+            var result = await compareObjectPermissions.CompareObjPerms(true, "0052j000000WkzFAAS", "0052j000000UJw0AAG");
+            File.WriteAllText("objectperms.json", result);
 
             Console.WriteLine(result);
         }
@@ -64,6 +67,7 @@ namespace Sollies.Rbac.FunctionalTests
             //compare Aaron 0052j000000WkzFAAS and Alicia 0052j000000UJw0AAG
 
             var result = await compareUserPermissions.CompareSetupEntityPerms(true, "0052j000000WkzFAAS", "0052j000000UJw0AAG");
+            File.WriteAllText("setupperms.json", result);
 
             Console.WriteLine(result);
         }
